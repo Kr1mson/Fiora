@@ -6,18 +6,17 @@ import { images } from '../../constants';
 import { useDataContext } from '../../data/DataContext';
 import FormField from '../../components/FormField';
 import CustomButton from '../../components/CustomButton';
-import CountDown from 'react-native-countdown-component';
+import CountdownTimer from '../../components/CountDown';
 
 const Product = () => {
   const [pin, setPin] = useState('');
-  const [counterReq, setCounterReq] = useState(false)
   const [pinMatch, setPinMatch] = useState(false);
   const [pinDetails, setPinDetails] = useState({ provider: '', tat: '' });
   const [deliveryDate, setDeliveryDate] = useState('');
-  const [timeLeft, setTimeLeft] = useState(0);
+  const [timeLeft, setTimeLeft] = useState({});
   const { query } = useLocalSearchParams();
   const { pinData, productData, stockData } = useDataContext();
-
+  const [counterReq, setCounterReq] = useState(false);
   const getData = (id) => {
     const product = productData.find(item => item[0] === id);
     const stockItem = stockData.find(item => item[0] === id);
@@ -56,8 +55,8 @@ const Product = () => {
             estimatedDate.setDate(now.getDate() + 1); // Next day
           }
         } else if (pinDetails.provider === "Provider B") {
-          estimatedDate = new Date(now);
           setCounterReq(true);
+          estimatedDate = new Date(now);
           if (now.getHours() >= 9) {
             estimatedDate.setDate(now.getDate() + 1); // Next day
           }
@@ -79,30 +78,41 @@ const Product = () => {
 
   const calculateTimeLeft = () => {
     const now = new Date();
-    const targetHour = pinDetails.provider === "Provider B" ? 9 : 17; // 9 AM for Provider B, 5 PM for Provider A
+    const targetHour = pinDetails.provider === "Provider B" ? 9 : 17; 
     const targetDate = new Date(now);
-    targetDate.setHours(targetHour, 0, 0, 0); // Set to 9 AM or 5 PM today
+    targetDate.setHours(targetHour, 0, 0, 0);
 
     if (now.getHours() >= targetHour) {
-      targetDate.setDate(now.getDate() + 1); // Set to next day if the time has already passed
+      targetDate.setDate(now.getDate() + 1); 
     }
 
     const difference = targetDate - now;
 
+    let timeLeft = {};
     if (difference > 0) {
-      return Math.floor(difference / 1000); // Return total seconds
+      timeLeft = {
+        hours: Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+        minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
+        seconds: Math.floor((difference % (1000 * 60)) / 1000),
+      };
     } else {
-      return 0; // If time has already passed, return 0
+      timeLeft = {
+        hours: 0,
+        minutes: 0,
+        seconds: 0,
+      };
     }
+    return timeLeft;
   };
 
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft(calculateTimeLeft());
     }, 1000);
-
-    return () => clearInterval(timer); // Cleanup interval on unmount
+    
+    return () => clearInterval(timer); 
   }, [pinDetails.provider]);
+
 
   return (
     <SafeAreaView className="px-7 py-5 bg-primary h-full items-center">
@@ -143,12 +153,21 @@ const Product = () => {
         {counterReq &&(
           <View className="flex-row items-center justify-center">
           <Text>Order in </Text>
-          <CountDown
-            until={timeLeft} 
-            onFinish={() => alert('finished')}
-            size={20}
-            timeToShow={['H', 'M', 'S']}
-          />
+          <View className="flex-row gap-2">
+            <View className="w-20 h-20 bg-secondary rounded-xl justify-center items-center">
+              <Text className="text-bold text-[25px] text-white">{timeLeft.hours}</Text>
+              <Text className="text-pmedium text-gray-500">Hours</Text>
+            </View>
+            <View className="w-20 h-20 bg-secondary rounded-xl justify-center items-center">
+              <Text className="text-bold text-[25px] text-white">{timeLeft.minutes}</Text>
+              <Text className="text-pmedium text-gray-500">Minutes</Text>
+            </View>
+            <View className="w-20 h-20 bg-secondary rounded-xl justify-center items-center">
+              <Text className="text-bold text-[25px] text-white">{timeLeft.seconds}</Text>
+              <Text className="text-pmedium text-gray-500">Seconds</Text>
+            </View>
+          </View>
+          
           <Text>
              for{' '} 
              <Text className="text-green-800">Same Day Delivery</Text>

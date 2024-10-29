@@ -1,23 +1,27 @@
 import React from 'react';
 import { View, Text } from 'react-native';
-import CountDown from 'react-native-countdown-component';
 
-const CountdownTimer = ({ timeLeft }) => {
+const CountdownTimer = ({ hours,minutes,seconds }) => {
   if (timeLeft <= 0) return null; 
+  
 
   return (
-    <View className="flex-row items-center justify-center">
-      <Text>Order in </Text>
-      <CountDown
-        until={timeLeft}
-        onFinish={() => alert('Finished!')}
-        size={20}
-        timeToShow={['H', 'M', 'S']}
-      />
-      <Text>
-        for{' '}
-        <Text className="text-green-800">Same Day Delivery</Text>
-      </Text>
+    <View className="flex-row gap-2">
+      <View className="w-20 h-20 bg-secondary rounded-xl justify-center items-center">
+        <Text className="text-bold text-[25px] text-white">{hours}</Text>
+        <Text className="text-pmedium text-gray-500">Hours</Text>
+      </View>
+      <View className="w-20 h-20 bg-secondary rounded-xl justify-center items-center">
+        <Text className="text-bold text-[25px] text-white">{minutes}</Text>
+        <Text className="text-pmedium text-gray-500">Minutes</Text>
+      </View>
+      <View className="w-20 h-20 bg-secondary rounded-xl justify-center items-center">
+        <Text className="text-bold text-[25px] text-white">{seconds}</Text>
+        <Text className="text-pmedium text-gray-500">Seconds</Text>
+      </View>
+      
+      
+
     </View>
   );
 };
